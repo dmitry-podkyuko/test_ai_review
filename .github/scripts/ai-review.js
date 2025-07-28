@@ -1,11 +1,11 @@
-const { Configuration, OpenAIApi } = require("openai");
+
+const OpenAI = require("openai");
 const { execSync } = require("child_process");
 const github = require("@actions/github");
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 const token = process.env.GITHUB_TOKEN;
 const octokit = github.getOctokit(token);
@@ -15,7 +15,7 @@ async function runReview() {
   try {
     const diff = execSync("git diff origin/main").toString();
 
-    const res = await openai.createChatCompletion({
+    const res = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
@@ -32,7 +32,7 @@ async function runReview() {
       max_tokens: 800,
     });
 
-    const reviewComment = res.data.choices[0].message.content;
+    const reviewComment = res.choices[0].message.content;
     console.log("\n🤖 AI Review Suggestions:\n");
     console.log(reviewComment);
 
